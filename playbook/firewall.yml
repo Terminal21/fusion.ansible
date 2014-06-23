@@ -11,6 +11,10 @@
     notify:
       - restart network interfaces
 
+  - name: enable routing
+    lineinfile: dest=/etc/sysctl.conf line='net.inet.ip.forwarding=1' regexp='net.inet.ip.forwarding='
+    notify: update routing
+
   - name: enable dhcp server
     lineinfile: dest=/etc/rc.conf.local line='dhcpd_flags=""'
 
@@ -21,6 +25,9 @@
   handlers:
   - name: restart network interfaces
     raw: /bin/sh /etc/netstart
+
+  - name: update routing
+    raw: /sbin/sysctl net.inet.ip.forwarding=1
 
   - name: restart dhcp server
     raw: /bin/sh /etc/rc.d/dhcpd restart
