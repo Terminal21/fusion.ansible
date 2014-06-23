@@ -1,0 +1,26 @@
+---
+- hosts: tower.fusion
+  tasks:
+  - name: configure network interfaces
+    template: src=resources/firewall/hostname.cas.in dest=/etc/hostname.{{item.nic}}
+    with_items:
+      - { nic: 'cas0', ip: '10.11.0.1', mac: '00:11:22:33:44:55' }
+      - { nic: 'cas1', ip: '192.168.21.1', mac: '00:11:22:33:44:66' }
+      - { nic: 'cas2', ip: '192.168.31.1', mac: '00:11:22:33:44:77' }
+      - { nic: 'cas3', ip: '192.168.41.1', mac: '00:11:22:33:44:88' }
+    notify:
+      - restart network interfaces
+
+  - name: enable dhcp server
+    lineinfile: dest=/etc/rc.conf.local line='dhcpd_flags=""'
+
+  - name: configure dhcp server
+    copy: src=resources/firewall/dhcpd.conf dest=/etc/dhcpd.conf owner=root group=wheel
+    notify: restart dhcp server
+
+  handlers:
+  - name: restart network interfaces
+    raw: /bin/sh /etc/netstart
+
+  - name: restart dhcp server
+    raw: /bin/sh /etc/rc.d/dhcpd restart
