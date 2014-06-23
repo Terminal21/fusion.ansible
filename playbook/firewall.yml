@@ -22,6 +22,13 @@
     copy: src=resources/firewall/dhcpd.conf dest=/etc/dhcpd.conf owner=root group=wheel
     notify: restart dhcp server
 
+  - name: enable dns server
+    lineinfile: dest=/etc/rc.conf.local line='named_flags=""'
+
+  - name: configure dns server
+    copy: src=resources/firewall/named.conf dest=/var/named/etc/named.conf
+    notify: restart dns server
+
   handlers:
   - name: restart network interfaces
     raw: /bin/sh /etc/netstart
@@ -31,3 +38,6 @@
 
   - name: restart dhcp server
     raw: /bin/sh /etc/rc.d/dhcpd restart
+
+  - name: restart dns server
+    raw: /bin/sh /etc/rc.d/named restart
